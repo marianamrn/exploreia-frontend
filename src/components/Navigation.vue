@@ -62,16 +62,17 @@ nav {
 .logo-container {
   display: flex;
   align-items: center;
+  margin-left: 4%;
 }
 
 .logo img {
   height: 70px;
-  margin: 0;
+  margin: 10px;
 }
 
 .logo h1 {
   font-family: 'Major Mono Display', monospace;
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 400; 
   color: #CAF0FB;
   margin: 0; 
