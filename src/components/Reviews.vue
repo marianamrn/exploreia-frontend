@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h1>Тури</h1>
+    <h1>Відгуки</h1>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Tours'
+  name: 'Reviews'
 };
 </script>
 
