@@ -1,9 +1,32 @@
 <template>
-  <div>
+  <div class="tours-container">
     <h1>Тури</h1>
     <p v-if="loading">Завантаження...</p>
     <p v-else-if="error">{{ error }}</p>
-    <p v-else>Назва туру: {{ tourTitle }}</p>
+
+    <!-- Список турів -->
+    <div class="tours-grid">
+      <div
+        v-for="tour in tours"
+        :key="tour.id"
+        class="tour-card"
+        @click="goToTourDetails(tour.id)"
+      >
+        <!-- Фото банера -->
+        <div
+          class="tour-banner"
+          :style="{ backgroundImage: 'url(' + tour.image_path + ')' }"
+        ></div>
+
+        <!-- Інформація про тур -->
+        <div class="tour-info">
+          <h2>{{ tour.title }}</h2>
+          <p><i class="location-icon"></i> {{ tour.destination_location }}</p>
+          <p><i class="calendar-icon"></i> {{ formatDate(tour.start_date) }}</p>
+          <p><i class="people-icon"></i> {{ tour.people_limit }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -14,36 +37,50 @@ export default {
   name: 'Tours',
   data() {
     return {
-      tourTitle: '',
+      tours: [],
       loading: true,
       error: null,
     };
   },
   mounted() {
-    this.fetchTour();
+    this.fetchTours();
   },
   methods: {
-    async fetchTour() {
+    // Отримання даних про тури
+    async fetchTours() {
       try {
-        // Заміна localhost на IP-адресу сервера
-        const response = await axios.get('http://192.168.0.100/exploreia-backend/getTour.php');
-        this.tourTitle = response.data.title;
+        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+        const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php`);
+        this.tours = response.data;
       } catch (err) {
-        this.error = 'Помилка при завантаженні туру';
+        this.error = 'Помилка при завантаженні турів';
       } finally {
         this.loading = false;
       }
+    },
+
+    // Перехід на сторінку деталей туру
+    goToTourDetails(id) {
+      this.$router.push(`/tours/${id}`);
+    },
+
+    // Форматування дати
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('uk-UA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     },
   },
 };
 </script>
 
 <style scoped>
-h1 {
-  font-size: 24px;
-  margin-bottom: 16px;
-}
-p {
-  font-size: 18px;
+.tour-banner {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
 }
 </style>
