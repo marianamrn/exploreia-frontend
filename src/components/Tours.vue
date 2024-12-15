@@ -1,6 +1,6 @@
 <template>
   <div class="tours-container">
-    <h1>Тури</h1>
+    <h1>Список турів</h1>
     <p v-if="loading">Завантаження...</p>
     <p v-else-if="error">{{ error }}</p>
 
@@ -13,10 +13,7 @@
         @click="goToTourDetails(tour.id)"
       >
         <!-- Фото банера -->
-        <div
-          class="tour-banner"
-          :style="{ backgroundImage: 'url(' + tour.image_path + ')' }"
-        ></div>
+        <img :src="tour.image_path" alt="Зображення туру" class="tour-banner" />
 
         <!-- Інформація про тур -->
         <div class="tour-info">
@@ -31,10 +28,10 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'Tours',
+  name: "Tours",
   data() {
     return {
       tours: [],
@@ -46,30 +43,26 @@ export default {
     this.fetchTours();
   },
   methods: {
-    // Отримання даних про тури
     async fetchTours() {
-      try {
-        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-        const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php`);
-        this.tours = response.data;
-      } catch (err) {
-        this.error = 'Помилка при завантаженні турів';
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // Перехід на сторінку деталей туру
+    try {
+      const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+      const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php`);
+      console.log("Tours fetched:", response.data); // Логуємо отримані дані
+      this.tours = response.data;
+    } catch (err) {
+      this.error = "Помилка при завантаженні турів";
+    } finally {
+      this.loading = false;
+    }
+  },
     goToTourDetails(id) {
       this.$router.push(`/tours/${id}`);
     },
-
-    // Форматування дати
     formatDate(date) {
-      return new Date(date).toLocaleDateString('uk-UA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      return new Date(date).toLocaleDateString("uk-UA", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     },
   },
@@ -80,7 +73,33 @@ export default {
 .tour-banner {
   width: 100%;
   height: 200px;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.tours-container {
+  padding: 16px;
+}
+.tours-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.tour-card {
+  flex: 1 1 calc(33.333% - 16px);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: transform 0.2s;
+}
+.tour-card:hover {
+  transform: scale(1.02);
+}
+.tour-info {
+  text-align: left;
 }
 </style>
