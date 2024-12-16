@@ -2,6 +2,10 @@
   <div class="tours-container">
     <p v-if="loading">Завантаження...</p>
     <p v-else-if="error">{{ error }}</p>
+    <p v-else-if="!tours.length">Упс, здається у нас ще немає такого туру</p>
+
+    <!-- Пошуковий фільтр -->
+    <TourFilter @filter-tours="fetchToursWithFilters" :cities="cities" />
 
     <!-- Список турів -->
     <div class="tours-grid">
@@ -11,10 +15,7 @@
         class="tour-card"
         @click="goToTourDetails(tour.id)"
       >
-        <!-- Фото банера -->
         <img :src="tour.image_path" alt="Зображення туру" class="tour-banner" />
-
-        <!-- Інформація про тур -->
         <div class="tour-info">
           <h2>{{ tour.title }}</h2>
           <p><MapPinIcon class="location-icon" /> {{ tour.destination_location }}</p>
@@ -29,10 +30,12 @@
 <script>
 import axios from "axios";
 import { MapPinIcon, CalendarIcon, UsersIcon } from '@heroicons/vue/24/outline';
+import TourFilter from "@/components/TourFilter.vue";
 
 export default {
   name: "Tours",
   components: {
+    TourFilter,
     MapPinIcon,
     CalendarIcon,
     UsersIcon,
@@ -42,23 +45,44 @@ export default {
       tours: [],
       loading: true,
       error: null,
+      filters: {},
+      cities: [], 
     };
   },
   mounted() {
+    this.fetchCities(); 
     this.fetchTours();
   },
   methods: {
-    async fetchTours() {
+    async fetchCities() {
       try {
         const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-        const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php`);
-        console.log("Tours fetched:", response.data); // Логуємо отримані дані
+        const response = await axios.get(`${baseURL}/exploreia-backend/getCities.php`);
+        this.cities = response.data;
+      } catch (err) {
+        console.error("Помилка при завантаженні міст:", err);
+      }
+    },
+    async fetchTours(filters = {}) {
+      try {
+        this.loading = true;
+        this.error = null;
+
+        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+        const params = new URLSearchParams(filters).toString();
+
+        const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php?${params}`);
         this.tours = response.data;
+
       } catch (err) {
         this.error = "Помилка при завантаженні турів";
       } finally {
         this.loading = false;
       }
+    },
+    fetchToursWithFilters(filters) {
+      this.filters = filters;
+      this.fetchTours(this.filters);
     },
     goToTourDetails(id) {
       this.$router.push(`/tours/${id}`);
