@@ -4,7 +4,7 @@
     <p v-else-if="error">{{ error }}</p>
     <p v-else-if="!tours.length">Упс, здається у нас ще немає такого туру</p>
 
-    <!-- Пошуковий фільтр -->
+    <!-- Пошуковий -->
     <TourFilter @filter-tours="fetchToursWithFilters" :cities="cities" />
 
     <!-- Список турів -->
@@ -20,9 +20,14 @@
           <h2>{{ tour.title }}</h2>
           <p><MapPinIcon class="location-icon" /> {{ tour.destination_location }}</p>
           <p><CalendarIcon class="calendar-icon" /> {{ formatDate(tour.start_date) }}</p>
-          <p><UsersIcon class="people-icon" /> {{ tour.people_limit }}</p>
+          <p><UsersIcon class="people-icon" /> {{ tour.people_limit }} людей</p>
         </div>
       </div>
+    </div>
+
+    <!-- Кнопка "Ще" -->
+    <div v-if="hasMoreTours" class="load-more-container">
+      <button class="load-more-button" @click="loadMoreTours">Ще</button>
     </div>
   </div>
 </template>
@@ -46,11 +51,13 @@ export default {
       loading: true,
       error: null,
       filters: {},
-      cities: [], 
+      cities: [],
+      currentPage: 1,
+      hasMoreTours: true, // Визначає, чи є ще тури для завантаження
     };
   },
   mounted() {
-    this.fetchCities(); 
+    this.fetchCities();
     this.fetchTours();
   },
   methods: {
@@ -69,11 +76,15 @@ export default {
         this.error = null;
 
         const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-        const params = new URLSearchParams(filters).toString();
+        const params = new URLSearchParams({ ...filters, page: this.currentPage }).toString();
 
         const response = await axios.get(`${baseURL}/exploreia-backend/getTour.php?${params}`);
-        this.tours = response.data;
 
+        if (response.data.length) {
+          this.tours = [...this.tours, ...response.data];
+        } else {
+          this.hasMoreTours = false; // Якщо турів більше немає
+        }
       } catch (err) {
         this.error = "Помилка при завантаженні турів";
       } finally {
@@ -82,6 +93,13 @@ export default {
     },
     fetchToursWithFilters(filters) {
       this.filters = filters;
+      this.currentPage = 1; // Скидаємо сторінку до першої при зміні фільтрів
+      this.tours = [];
+      this.hasMoreTours = true;
+      this.fetchTours(this.filters);
+    },
+    loadMoreTours() {
+      this.currentPage += 1;
       this.fetchTours(this.filters);
     },
     goToTourDetails(id) {
@@ -100,18 +118,19 @@ export default {
 
 <style scoped>
 .tours-container {
-  padding: 1.6%;
+  padding: 5%;
+  padding-top: 2%;
 }
 
 .tours-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px; 
   justify-content: space-between;
 }
 
 .tour-card {
-  flex: 1 1 calc(25% - 16px); /* 4 картки в рядку для великих екранів */
+  flex: 1 1 calc(25% - 8px); /* 4 картки в рядку для великих екранів */
   max-width: 300px;
   min-width: 280px;
   height: 400px;
@@ -121,6 +140,7 @@ export default {
   padding: 0;
   background-color: #404347;
   transition: background-color 0.2s;
+  margin-bottom: 2%; 
 }
 
 .tour-card:hover {
@@ -164,16 +184,41 @@ export default {
   height: 20px;
 }
 
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.load-more-button {
+  width: 140px;
+  height: 32px;
+  background-color: #0077B6;
+  color: #CAF0FB;
+  border: none;
+  border-radius: 100px;
+  font-size: 14px;
+  font-family: 'Noto Serif', serif;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.load-more-button:hover {
+  background-color: transparent;
+  border: 2px solid #0077B6;
+  color: #0077B6;
+}
+
 /* Медіа-запити для адаптивності */
 @media (max-width: 1024px) {
   .tour-card {
-    flex: 1 1 calc(33.333% - 16px); /* 3 картки в рядку на екранах середнього розміру */
+    flex: 1 1 calc(33.333% - 8px); /* 3 картки в рядку на екранах середнього розміру */
   }
 }
 
 @media (max-width: 768px) {
   .tour-card {
-    flex: 1 1 calc(50% - 16px); /* 2 картки в рядку на малих екранах */
+    flex: 1 1 calc(50% - 8px); /* 2 картки в рядку на малих екранах */
   }
 }
 
