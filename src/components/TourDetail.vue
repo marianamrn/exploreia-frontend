@@ -12,9 +12,9 @@
 
     <!-- Інформація про тур -->
     <div class="tour-info">
-      <!-- Заголовки та пункти -->
-      <div class="columns">
-        <div v-if="whereTo" class="column">
+      <!-- Блоки "Де?", "Для кого?", "Чому?" -->
+      <div class="info-blocks">
+        <div class="info-block">
           <h2 class="title">Де?</h2>
           <p v-for="(line, index) in splitText(whereTo)" :key="index" class="text">
             <CheckCircleIcon v-if="index !== 0" class="icon filled" />
@@ -22,7 +22,7 @@
           </p>
         </div>
 
-        <div v-if="forWhom" class="column">
+        <div class="info-block">
           <h2 class="title">Для кого?</h2>
           <p v-for="(line, index) in splitText(forWhom)" :key="index" class="text">
             <CheckCircleIcon v-if="index !== 0" class="icon filled" />
@@ -30,7 +30,7 @@
           </p>
         </div>
 
-        <div v-if="whyGo" class="column">
+        <div class="info-block">
           <h2 class="title">Чому?</h2>
           <p v-for="(line, index) in splitText(whyGo)" :key="index" class="text">
             <CheckCircleIcon v-if="index !== 0" class="icon filled" />
@@ -39,10 +39,33 @@
         </div>
       </div>
 
-      <!-- Перевірка на відсутність даних -->
-      <p v-if="!whereTo">Дані для "Де?" відсутні.</p>
-      <p v-if="!forWhom">Дані для "Для кого?" відсутні.</p>
-      <p v-if="!whyGo">Дані для "Чому?" відсутні.</p>
+      <!-- Додаткові блоки інформації (Ласкаво просимо, Включено, Цікаві факти) -->
+      <div class="extra-info">
+        <div class="left-column">
+          <div v-if="description" class="section">
+            <h2 class="title">Ласкаво просимо у {{ tour.title }}!</h2>
+            <p>{{ description }}</p>
+          </div>
+
+          <div v-if="includes" class="section">
+            <h2 class="title">Екскурсії у {{ tour.title }} включають</h2>
+            <ul>
+              <li v-for="(item, index) in splitText(includes)" :key="index">
+                <CheckCircleIcon class="icon" /> {{ item }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="right-column">
+          <div v-if="facts" class="section">
+            <h2 class="title">Цікаві факти про {{ tour.title }}:</h2>
+            <p v-for="(line, index) in splitText(facts)" :key="index">
+              <CheckCircleIcon class="icon" /> {{ line }}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <p v-else>Завантаження деталей туру...</p>
@@ -51,7 +74,7 @@
 <script>
 import axios from "axios";
 import Carousel from "@/components/TourImagesCarousel.vue";
-import { CheckCircleIcon } from '@heroicons/vue/24/outline'; // Імпорт іконки
+import { CheckCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: "TourDetail",
@@ -67,6 +90,9 @@ export default {
       whereTo: null,
       forWhom: null,
       whyGo: null,
+      description: null,
+      includes: null,
+      facts: null,
     };
   },
   mounted() {
@@ -80,13 +106,17 @@ export default {
         const tourResponse = await axios.get(
           `${baseURL}/exploreia-backend/getTourDetails.php?id=${tourId}`
         );
-        console.log('Tour data:', tourResponse.data); // Логування даних для перевірки
+        console.log("Tour data:", tourResponse.data);
+
         this.tour = tourResponse.data.tour;
         this.images = tourResponse.data.images;
         this.bannerImage = tourResponse.data.banner;
         this.whereTo = tourResponse.data.where_to;
         this.forWhom = tourResponse.data.for_whom;
         this.whyGo = tourResponse.data.why_go;
+        this.description = tourResponse.data.description;
+        this.includes = tourResponse.data.includes;
+        this.facts = tourResponse.data.facts;
       } catch (err) {
         console.error("Помилка при завантаженні деталей туру", err);
       }
@@ -100,98 +130,155 @@ export default {
 </script>
 
 <style scoped>
-    .tour-detail-container {
-    box-sizing: border-box;
-    }
+.tour-detail-container {
+  box-sizing: border-box;
+}
 
-    .banner {
+.banner {
+  width: 100%;
+  height: 60vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  padding: 0;
+}
+
+.banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(40, 42, 44, 0) 20%, rgba(40, 42, 44, 1) 100%);
+}
+
+.tour-info {
+  margin-top: 8%;
+  padding: 0 2%;
+}
+
+.title {
+  font-family: 'Ermilov', sans-serif;
+  font-size: 32px;
+  color: #0077b6;
+  margin-bottom: 10px;
+  text-align: left;
+  max-width: 100%;
+}
+
+.text {
+  font-family: 'Noto Serif', serif;
+  font-weight: 100;
+  color: #CAF0FB;
+  font-size: 16px;
+  margin: 5px 0;
+  text-align: justify;
+  max-width: 100%;
+  margin-right: auto;
+}
+
+.info-blocks {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.info-block {
+  width: 28%;
+  margin-bottom: 20px;
+}
+
+.info-block p {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.icon {
+  margin-right: 10px;
+  color: #0077b6;
+  width: 16px;
+  height: 16px;
+}
+
+.extra-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 96%;
+  margin-left: 2%;
+  margin-right: 2%;
+  flex-wrap: wrap;
+}
+
+.extra-info .left-column,
+.extra-info .right-column {
+  width: 45%;
+  padding: 0;
+}
+
+.extra-info h2 {
+  font-family: 'Ermilov', sans-serif;
+  font-size: 32px;
+  color: #0077b6;
+  margin-bottom: 15px;
+}
+
+.extra-info p {
+  font-family: 'Noto Serif', serif;
+  font-size: 16px;
+  font-weight: 100;
+  color: #CAF0FB;
+  text-align: justify;
+  line-height: 1.5;
+}
+
+.extra-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.extra-info li {
+  font-family: 'Noto Serif', serif;
+  font-size: 16px;
+  font-weight: 100;
+  color: #CAF0FB;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+.extra-info .icon {
+  margin-right: 8px;
+  color: #0077b6;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 900px) {
+  .extra-info .left-column,
+  .extra-info .right-column {
     width: 100%;
-    height: 60vh;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    }
+    margin-bottom: 20px;
+  }
 
-    .banner::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
+  .extra-info {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .info-blocks {
+    flex-direction: column;
+  }
+
+  .info-block {
     width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, rgba(40, 42, 44, 0) 20%, rgba(40, 42, 44, 1) 100%);
-    }
-
-    .tour-info {
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 6%;
-    }
-
-    .tour-info h1 {
-    color: #0077b6;
-    }
-
-    .title {
-    font-family: 'Ermilov', sans-serif;
-    font-size: 32px;
-    color: #0077b6;
-    margin-bottom: 10px;
-    text-align: left;
-    max-width: 80%;
-    margin-left: 0;
-    }
-
-    .text {
-    font-family: 'Noto Serif', serif;
-    font-weight: 100;
-    color: #CAF0FB;
-    font-size: 16px;
-    margin: 5px 0;
-    text-align: justify;
-    max-width: 80%;
-    margin-left: 0;
-    margin-right: auto;
-    }
-
-    .column p {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    }
-
-    .icon {
-    margin-right: 10px;
-    color: #0077b6;
-    width: 16px;
-    height: 16px;
-    }
-
-    .columns {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-    }
-
-    .column {
-    flex: 1;
-    padding: 0 2%;
-    width: calc(33.33% - 4%);
-    }
-
-    .column h2 {
-    margin-top: 0;
-    color: #0077b6;
-    font-size: 32px;
-    text-align: left;
-    max-width: 80%;
-    margin-left: 0;
-    }
-
-    /* Респонсивність */
-    @media (max-width: 400px) {
-    .columns {
-        flex-direction: column;
-    }
-    }
+  }
+}
 </style>
