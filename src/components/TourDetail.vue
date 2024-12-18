@@ -42,9 +42,10 @@
       <!-- Додаткові блоки інформації (Ласкаво просимо, Включено, Цікаві факти) -->
       <div class="extra-info">
         <div class="left-column">
-          <div v-if="description" class="section">
+          <div v-if="welcomeTourPhoto" class="section">
             <h2 class="title">Ласкаво просимо у {{ tour.title }}!</h2>
             <p>{{ description }}</p>
+            <img :src="welcomeTourPhoto.image_path" :alt="welcomeTourPhoto.alt_text" class="welcome-photo" />
           </div>
 
           <div v-if="includes" class="section">
@@ -58,7 +59,19 @@
         </div>
 
         <div class="right-column">
-          <div v-if="facts" class="section">
+          <!-- Картки ShortTourInfo -->
+          <ShortTourInfo
+            :durationDays="tour.duration_days"
+            :shortInfoTime="tour.short_info_time"
+            :price="tour.price"
+            :shortInfoPrice="tour.short_info_price"
+            :peopleLimit="tour.people_limit"
+            :shortInfoPeople="tour.short_info_people"
+            :discount="tour.discount"
+            :shortInfoDiscount="tour.short_info_discount"
+          />
+
+          <div v-if="facts" class="section facts-section">
             <h2 class="title">Цікаві факти про {{ tour.title }}:</h2>
             <p v-for="(line, index) in splitText(facts)" :key="index">
               <CheckCircleIcon class="icon" /> {{ line }}
@@ -74,6 +87,7 @@
 <script>
 import axios from "axios";
 import Carousel from "@/components/TourImagesCarousel.vue";
+import ShortTourInfo from "@/components/ShortTourInfo.vue";
 import { CheckCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
@@ -81,6 +95,7 @@ export default {
   components: {
     Carousel,
     CheckCircleIcon,
+    ShortTourInfo,
   },
   data() {
     return {
@@ -93,6 +108,7 @@ export default {
       description: null,
       includes: null,
       facts: null,
+      welcomeTourPhoto: null,
     };
   },
   mounted() {
@@ -117,6 +133,7 @@ export default {
         this.description = tourResponse.data.description;
         this.includes = tourResponse.data.includes;
         this.facts = tourResponse.data.facts;
+        this.welcomeTourPhoto = tourResponse.data.welcomeTourPhoto;
       } catch (err) {
         console.error("Помилка при завантаженні деталей туру", err);
       }
@@ -259,26 +276,17 @@ export default {
   height: 16px;
 }
 
+.welcome-photo {
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
 @media (max-width: 900px) {
   .extra-info .left-column,
   .extra-info .right-column {
     width: 100%;
     margin-bottom: 20px;
-  }
-
-  .extra-info {
-    flex-direction: column;
-    gap: 20px;
-  }
-}
-
-@media (max-width: 400px) {
-  .info-blocks {
-    flex-direction: column;
-  }
-
-  .info-block {
-    width: 100%;
   }
 }
 </style>
