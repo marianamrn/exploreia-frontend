@@ -86,6 +86,8 @@
         Бронювати тур
       </button>
     </div>
+
+    <TourCarousel :tours="similarTours" />
   </div>
   <p v-else>Завантаження деталей туру...</p>
 </template>
@@ -94,6 +96,7 @@
 import axios from "axios";
 import Carousel from "@/components/TourImagesCarousel.vue";
 import ShortTourInfo from "@/components/ShortTourInfo.vue";
+import TourCarousel from "@/components/TourCarousel.vue";
 import { CheckCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
@@ -102,6 +105,7 @@ export default {
     Carousel,
     CheckCircleIcon,
     ShortTourInfo,
+    TourCarousel,
   },
   data() {
     return {
@@ -115,11 +119,13 @@ export default {
       includes: null,
       facts: null,
       welcomeTourPhoto: null,
+      similarTours: [],
     };
   },
   mounted() {
     const tourId = this.$route.params.id;
     this.fetchTourDetails(tourId);
+    this.fetchSimilarTours(tourId);
   },
   methods: {
     async fetchTourDetails(tourId) {
@@ -142,6 +148,16 @@ export default {
         this.welcomeTourPhoto = tourResponse.data.welcomeTourPhoto;
       } catch (err) {
         console.error("Помилка при завантаженні деталей туру", err);
+      }
+    },
+
+    async fetchSimilarTours(tourId) {
+      try {
+        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+        const response = await axios.get(`${baseURL}/exploreia-backend/getSimilarTours.php?tourId=${tourId}`);
+        this.similarTours = response.data;
+      } catch (err) {
+        console.error("Помилка при завантаженні подібних турів:", err);
       }
     },
 
