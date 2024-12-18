@@ -80,6 +80,12 @@
         </div>
       </div>
     </div>
+    <!-- Кнопка "Бронювати тур" -->
+    <div class="book-tour-button-container">
+      <button class="book-tour-button">
+        Бронювати тур
+      </button>
+    </div>
   </div>
   <p v-else>Завантаження деталей туру...</p>
 </template>
@@ -288,5 +294,33 @@ export default {
     width: 100%;
     margin-bottom: 20px;
   }
+}
+
+.book-tour-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.book-tour-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 240px;
+  height: 56px;
+  background-color: #0077B6;
+  color: #CAF0FB;
+  font-size: 18px;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.book-tour-button:hover {
+  background-color: transparent;
+  border: 2px solid #0077B6;
 }
 </style>
