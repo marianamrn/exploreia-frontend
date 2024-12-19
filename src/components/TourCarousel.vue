@@ -132,8 +132,6 @@ body {
   cursor: pointer;
   font-size: 48px;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   padding: 4%;
   transition: transform 0.2s ease-in-out;
 }
