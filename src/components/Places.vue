@@ -7,6 +7,16 @@
       :style="{ backgroundImage: `url(${bannerImage})` }"
     ></div>
 
+    <!-- Текстовий банер над фільтром -->
+    <div class="text-overlay">
+      <h1>Відкрий для себе</h1>
+      <h2>
+        <span class="line1">свою</span>
+        <br />
+        <span class="line2">Україну</span>
+      </h2>
+    </div>
+
     <!-- Фільтр -->
     <PlaceFilter 
       :regions="regions" 
@@ -143,6 +153,44 @@ export default {
   width: 100%;
   height: 100%;
   background: linear-gradient(to bottom, rgba(40, 42, 44, 0) 20%, rgba(40, 42, 44, 1) 100%);
+}
+
+.text-overlay {
+  text-align: center;
+  color: #CAF0FB;
+  font-family: 'Ermilov', sans-serif;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.text-overlay h1 {
+  font-size: 42px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.text-overlay h2 {
+  font-size: 42px;
+  font-weight: bold;
+  margin-top: 2px;
+  line-height: 32px;
+}
+
+.text-overlay .line1 {
+  display: inline-block;
+  color: #CAF0FB;
+}
+
+.text-overlay .line2 {
+  display: inline-block;
+  background-color: #03045E; 
+  color: #CAF0FB;
+  padding: 0.2rem 1rem;
+  position: relative;
+  top: 10%;
+  left: 14%; 
 }
 
 .places-grid {
