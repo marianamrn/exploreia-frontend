@@ -7,6 +7,14 @@
       :style="{ backgroundImage: `url(${bannerImage})` }"
     ></div>
 
+    <!-- Фільтр -->
+    <PlaceFilter 
+      :regions="regions" 
+      :categories="categories" 
+      :seasonalities="seasonalities" 
+      @filter-places="applyFilters"
+    />
+
     <!-- Основний контент сторінки -->
     <div class="content">
       <p v-if="loading">Завантаження...</p>
@@ -44,31 +52,44 @@
 <script>
 import axios from "axios";
 import { MapPinIcon, CalendarIcon } from '@heroicons/vue/24/outline'; // Імпортуємо іконки
+import PlaceFilter from './PlaceFilter.vue'; // Імпортуємо PlaceFilter компонент
 
 export default {
+  components: {
+    MapPinIcon,
+    CalendarIcon,
+    PlaceFilter,
+  },
   data() {
     return {
       bannerImage: null,
-      places: [], // ініціалізуємо як порожній масив
+      places: [],
+      regions: [], // для областей
+      categories: [], // для категорій
+      seasonalities: [], // для сезонності
+      filters: {
+        region: '',
+        category: '',
+        seasonality: '',
+      },
       loading: true,
       error: null,
     };
   },
   created() {
     this.fetchData();
+    this.fetchFilterData(); // Завантажуємо дані для фільтрів
   },
   methods: {
     async fetchData() {
       try {
         this.loading = true;
         const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-        const response = await axios.get(`${baseURL}/exploreia-backend/getPlaces.php`);
-        
-        console.log(response.data); // Додано консольне виведення
+        const response = await axios.get(`${baseURL}/exploreia-backend/getPlaces.php`, {
+          params: this.filters, // передаємо фільтри в запит
+        });
 
-        // Перевірка, чи є банер і місцини в відповіді
         if (response.data && response.data.banner && Array.isArray(response.data.places)) {
-          // Декодування URL банера
           this.bannerImage = decodeURIComponent(response.data.banner);
           this.places = response.data.places;
         } else {
@@ -80,13 +101,27 @@ export default {
         this.loading = false;
       }
     },
+    async fetchFilterData() {
+      try {
+        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+        const response = await axios.get(`${baseURL}/exploreia-backend/getFilters.php`);
+        
+        if (response.data) {
+          this.regions = response.data.regions || [];
+          this.categories = response.data.categories || [];
+          this.seasonalities = response.data.seasonalities || [];
+        }
+      } catch (error) {
+        console.error("Помилка при завантаженні фільтрів:", error);
+      }
+    },
+    applyFilters(filters) {
+      this.filters = { ...filters };
+      this.fetchData(); // перезавантажуємо дані з новими фільтрами
+    },
     goToPlaceDetails(id) {
       this.$router.push(`/places/${id}`);
     },
-  },
-  components: {
-    MapPinIcon,
-    CalendarIcon,
   },
 };
 </script>
@@ -115,7 +150,7 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: space-between;
-  padding: 4% 4%;
+  padding: 2% 4%;
 }
 
 .place-card {
