@@ -17,6 +17,9 @@
       </h2>
     </div>
 
+    <!-- Карусель місцин -->
+    <PlaceCarousel :places="carouselPlaces" v-if="carouselPlaces.length > 0" />
+
     <!-- Фільтр -->
     <PlaceFilter 
       :regions="regions" 
@@ -41,7 +44,7 @@
         >
           <img :src="place.image_path" alt="Банер місцини" class="place-banner" />
           <div class="place-info">
-            <h2>{{ place.name }}</h2> <!-- Тепер виводимо name замість location_name -->
+            <h2>{{ place.name }}</h2>
             <div class="place-details">
               <div class="place-location">
                 <MapPinIcon class="place-icon" />
@@ -61,26 +64,29 @@
 
 <script>
 import axios from "axios";
-import { MapPinIcon, CalendarIcon } from '@heroicons/vue/24/outline'; // Імпортуємо іконки
-import PlaceFilter from './PlaceFilter.vue'; // Імпортуємо PlaceFilter компонент
+import { MapPinIcon, CalendarIcon } from "@heroicons/vue/24/outline"; 
+import PlaceFilter from "./PlaceFilter.vue"; 
+import PlaceCarousel from "./PlaceCarousel.vue"; 
 
 export default {
   components: {
     MapPinIcon,
     CalendarIcon,
     PlaceFilter,
+    PlaceCarousel,
   },
   data() {
     return {
       bannerImage: null,
       places: [],
-      regions: [], // для областей
-      categories: [], // для категорій
-      seasonalities: [], // для сезонності
+      carouselPlaces: [], // Дані для каруселі
+      regions: [],
+      categories: [],
+      seasonalities: [],
       filters: {
-        region: '',
-        category: '',
-        seasonality: '',
+        region: "",
+        category: "",
+        seasonality: "",
       },
       loading: true,
       error: null,
@@ -88,7 +94,8 @@ export default {
   },
   created() {
     this.fetchData();
-    this.fetchFilterData(); // Завантажуємо дані для фільтрів
+    this.fetchCarouselData(); // Отримуємо дані для каруселі
+    this.fetchFilterData(); 
   },
   methods: {
     async fetchData() {
@@ -96,7 +103,7 @@ export default {
         this.loading = true;
         const baseURL = `${window.location.protocol}//${window.location.hostname}`;
         const response = await axios.get(`${baseURL}/exploreia-backend/getPlaces.php`, {
-          params: this.filters, // передаємо фільтри в запит
+          params: this.filters,
         });
 
         if (response.data && response.data.banner && Array.isArray(response.data.places)) {
@@ -109,6 +116,18 @@ export default {
         this.error = "Помилка при завантаженні даних";
       } finally {
         this.loading = false;
+      }
+    },
+    async fetchCarouselData() {
+      try {
+        const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+        const response = await axios.get(`${baseURL}/exploreia-backend/getCarouselPlaces.php`);
+        
+        if (Array.isArray(response.data)) {
+          this.carouselPlaces = response.data;
+        }
+      } catch (error) {
+        console.error("Помилка при завантаженні даних для каруселі:", error);
       }
     },
     async fetchFilterData() {
@@ -127,7 +146,7 @@ export default {
     },
     applyFilters(filters) {
       this.filters = { ...filters };
-      this.fetchData(); // перезавантажуємо дані з новими фільтрами
+      this.fetchData();
     },
     goToPlaceDetails(id) {
       this.$router.push(`/places/${id}`);

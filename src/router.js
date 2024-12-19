@@ -6,7 +6,8 @@ import Tours from '@/components/Tours.vue';
 import TourFilter from '@/components/TourFilter.vue';
 import TourDetail from "@/components/TourDetail.vue";
 import ShortTourInfo from '@/components/ShortTourInfo.vue';
-import TourCarousel from '@/components/TourCarousel.vue'; // Додано
+import TourCarousel from '@/components/TourCarousel.vue';
+import PlaceCarousel from '@/components/PlaceCarousel.vue';
 import Places from '@/components/Places.vue';
 import Reviews from '@/components/Reviews.vue';
 
@@ -18,6 +19,7 @@ const routes = [
   { path: "/tours/:id", component: TourDetail },
   { path: '/short-tour-info', component: ShortTourInfo },
   { path: '/tour-carousel', component: TourCarousel },
+  { path: '/place-carousel', component: PlaceCarousel },
   { path: '/places', component: Places },
   { path: '/reviews', component: Reviews }
 ];
